@@ -1,0 +1,344 @@
+_wandb:
+    value:
+        cli_version: 0.27.0
+        e:
+            wrf9nkk2t2m4pp8ngo1h9j3dkekmc39o:
+                args:
+                    - train
+                    - --fold
+                    - "0"
+                    - --weights
+                    - yolo26x-seg.pt
+                    - --wandb
+                codePath: train.py
+                codePathLocal: train.py
+                cpu_count: 32
+                cpu_count_logical: 64
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "1888559353856"
+                        used: "638319292416"
+                email: benten.hsu@gmail.com
+                executable: /home/ben/nycu_hw/2026version_HuBMAP_Hacking_the_Human_Vasculature/.venv/bin/python3
+                git:
+                    commit: d2289cade0f1f31d02d0af86cbfa475934d61c72
+                    remote: https://github.com/benhsu0828/2026version_HuBMAP_Hacking_the_Human_Vasculature.git
+                gpu: NVIDIA RTX PRO 6000 Blackwell Server Edition
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Blackwell
+                      cudaCores: 24064
+                      memoryTotal: "102641958912"
+                      name: NVIDIA RTX PRO 6000 Blackwell Server Edition
+                      uuid: GPU-e5bbd07b-771a-0204-0796-d99ccb86fdf0
+                host: CG290-S3063
+                memory:
+                    total: "808763117568"
+                os: Linux-6.8.0-111-generic-x86_64-with-glibc2.35
+                program: /home/ben/nycu_hw/2026version_HuBMAP_Hacking_the_Human_Vasculature/train.py
+                python: CPython 3.13.12
+                root: /home/ben/nycu_hw/2026version_HuBMAP_Hacking_the_Human_Vasculature
+                startedAt: "2026-05-18T16:30:23.290738Z"
+                writerId: wrf9nkk2t2m4pp8ngo1h9j3dkekmc39o
+        m: []
+        python_version: 3.13.12
+        t:
+            "1":
+                - 1
+                - 41
+            "2":
+                - 1
+                - 41
+            "3":
+                - 2
+                - 13
+                - 16
+                - 61
+            "4": 3.13.12
+            "5": 0.27.0
+            "10":
+                - 20
+            "12": 0.27.0
+            "13": linux-x86_64
+        visualize:
+            curves/F1-Confidence(B):
+                panel_config:
+                    fieldSettings:
+                        class: class
+                        x: x
+                        "y": "y"
+                    panelDefId: wandb/area-under-curve/v0
+                    stringSettings:
+                        title: F1-Confidence(B)
+                        x-axis-title: Confidence
+                        y-axis-title: F1
+                    transform:
+                        name: tableWithLeafColNames
+                    userQuery:
+                        queryFields:
+                            - args:
+                                - name: runSets
+                                  value: ${runSets}
+                              fields:
+                                - fields: []
+                                  name: id
+                                - fields: []
+                                  name: name
+                                - fields: []
+                                  name: _defaultColorIndex
+                                - args:
+                                    - name: tableKey
+                                      value: curves/F1-Confidence(B)_table
+                                  fields: []
+                                  name: summaryTable
+                              name: runSets
+                panel_type: Vega2
+            curves/F1-Confidence(M):
+                panel_config:
+                    fieldSettings:
+                        class: class
+                        x: x
+                        "y": "y"
+                    panelDefId: wandb/area-under-curve/v0
+                    stringSettings:
+                        title: F1-Confidence(M)
+                        x-axis-title: Confidence
+                        y-axis-title: F1
+                    transform:
+                        name: tableWithLeafColNames
+                    userQuery:
+                        queryFields:
+                            - args:
+                                - name: runSets
+                                  value: ${runSets}
+                              fields:
+                                - fields: []
+                                  name: id
+                                - fields: []
+                                  name: name
+                                - fields: []
+                                  name: _defaultColorIndex
+                                - args:
+                                    - name: tableKey
+                                      value: curves/F1-Confidence(M)_table
+                                  fields: []
+                                  name: summaryTable
+                              name: runSets
+                panel_type: Vega2
+            curves/Precision-Confidence(B):
+                panel_config:
+                    fieldSettings:
+                        class: class
+                        x: x
+                        "y": "y"
+                    panelDefId: wandb/area-under-curve/v0
+                    stringSettings:
+                        title: Precision-Confidence(B)
+                        x-axis-title: Confidence
+                        y-axis-title: Precision
+                    transform:
+                        name: tableWithLeafColNames
+                    userQuery:
+                        queryFields:
+                            - args:
+                                - name: runSets
+                                  value: ${runSets}
+                              fields:
+                                - fields: []
+                                  name: id
+                                - fields: []
+                                  name: name
+                                - fields: []
+                                  name: _defaultColorIndex
+                                - args:
+                                    - name: tableKey
+                                      value: curves/Precision-Confidence(B)_table
+                                  fields: []
+                                  name: summaryTable
+                              name: runSets
+                panel_type: Vega2
+            curves/Precision-Confidence(M):
+                panel_config:
+                    fieldSettings:
+                        class: class
+                        x: x
+                        "y": "y"
+                    panelDefId: wandb/area-under-curve/v0
+                    stringSettings:
+                        title: Precision-Confidence(M)
+                        x-axis-title: Confidence
+                        y-axis-title: Precision
+                    transform:
+                        name: tableWithLeafColNames
+                    userQuery:
+                        queryFields:
+                            - args:
+                                - name: runSets
+                                  value: ${runSets}
+                              fields:
+                                - fields: []
+                                  name: id
+                                - fields: []
+                                  name: name
+                                - fields: []
+                                  name: _defaultColorIndex
+                                - args:
+                                    - name: tableKey
+                                      value: curves/Precision-Confidence(M)_table
+                                  fields: []
+                                  name: summaryTable
+                              name: runSets
+                panel_type: Vega2
+            curves/Precision-Recall(B):
+                panel_config:
+                    fieldSettings:
+                        class: class
+                        x: x
+                        "y": "y"
+                    panelDefId: wandb/area-under-curve/v0
+                    stringSettings:
+                        title: Precision-Recall(B)
+                        x-axis-title: Recall
+                        y-axis-title: Precision
+                    transform:
+                        name: tableWithLeafColNames
+                    userQuery:
+                        queryFields:
+                            - args:
+                                - name: runSets
+                                  value: ${runSets}
+                              fields:
+                                - fields: []
+                                  name: id
+                                - fields: []
+                                  name: name
+                                - fields: []
+                                  name: _defaultColorIndex
+                                - args:
+                                    - name: tableKey
+                                      value: curves/Precision-Recall(B)_table
+                                  fields: []
+                                  name: summaryTable
+                              name: runSets
+                panel_type: Vega2
+            curves/Precision-Recall(M):
+                panel_config:
+                    fieldSettings:
+                        class: class
+                        x: x
+                        "y": "y"
+                    panelDefId: wandb/area-under-curve/v0
+                    stringSettings:
+                        title: Precision-Recall(M)
+                        x-axis-title: Recall
+                        y-axis-title: Precision
+                    transform:
+                        name: tableWithLeafColNames
+                    userQuery:
+                        queryFields:
+                            - args:
+                                - name: runSets
+                                  value: ${runSets}
+                              fields:
+                                - fields: []
+                                  name: id
+                                - fields: []
+                                  name: name
+                                - fields: []
+                                  name: _defaultColorIndex
+                                - args:
+                                    - name: tableKey
+                                      value: curves/Precision-Recall(M)_table
+                                  fields: []
+                                  name: summaryTable
+                              name: runSets
+                panel_type: Vega2
+            curves/Recall-Confidence(B):
+                panel_config:
+                    fieldSettings:
+                        class: class
+                        x: x
+                        "y": "y"
+                    panelDefId: wandb/area-under-curve/v0
+                    stringSettings:
+                        title: Recall-Confidence(B)
+                        x-axis-title: Confidence
+                        y-axis-title: Recall
+                    transform:
+                        name: tableWithLeafColNames
+                    userQuery:
+                        queryFields:
+                            - args:
+                                - name: runSets
+                                  value: ${runSets}
+                              fields:
+                                - fields: []
+                                  name: id
+                                - fields: []
+                                  name: name
+                                - fields: []
+                                  name: _defaultColorIndex
+                                - args:
+                                    - name: tableKey
+                                      value: curves/Recall-Confidence(B)_table
+                                  fields: []
+                                  name: summaryTable
+                              name: runSets
+                panel_type: Vega2
+            curves/Recall-Confidence(M):
+                panel_config:
+                    fieldSettings:
+                        class: class
+                        x: x
+                        "y": "y"
+                    panelDefId: wandb/area-under-curve/v0
+                    stringSettings:
+                        title: Recall-Confidence(M)
+                        x-axis-title: Confidence
+                        y-axis-title: Recall
+                    transform:
+                        name: tableWithLeafColNames
+                    userQuery:
+                        queryFields:
+                            - args:
+                                - name: runSets
+                                  value: ${runSets}
+                              fields:
+                                - fields: []
+                                  name: id
+                                - fields: []
+                                  name: name
+                                - fields: []
+                                  name: _defaultColorIndex
+                                - args:
+                                    - name: tableKey
+                                      value: curves/Recall-Confidence(M)_table
+                                  fields: []
+                                  name: summaryTable
+                              name: runSets
+                panel_type: Vega2
+batch:
+    value: 8
+cache:
+    value: ram
+cmd:
+    value: train
+data:
+    value: null
+device:
+    value: "0"
+epochs:
+    value: 80
+fold:
+    value: 0
+func:
+    value: __main__.cmd_train
+wandb:
+    value: true
+wandb_project:
+    value: hubmap-vasculature
+weights:
+    value: yolo26x-seg.pt
+workers:
+    value: 8

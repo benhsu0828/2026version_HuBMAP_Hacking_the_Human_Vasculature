@@ -1,0 +1,5 @@
+{
+  "title": "HuBMAP Dual-Stream Weights (YOLO + MedSAM-2 LoRA)",
+  "id": "paohuah/hubmap-dual-stream-weights",
+  "licenses": [{"name": "CC0-1.0"}]
+}

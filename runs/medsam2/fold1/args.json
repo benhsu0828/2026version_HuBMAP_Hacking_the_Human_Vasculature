@@ -1,0 +1,17 @@
+{
+  "fold": 1,
+  "yolo_data": "yolo_data",
+  "meta": "dataset/tile_meta.csv",
+  "base_weights": "pretrained/MedSAM2_latest.pt",
+  "cfg": "configs/sam2.1_hiera_t512.yaml",
+  "tile_size": 768,
+  "epochs": 30,
+  "batch": 4,
+  "workers": 4,
+  "lr_lora": 0.0001,
+  "lr_dec": 5e-05,
+  "lora_rank": 16,
+  "lora_alpha": 32,
+  "device": "cuda",
+  "out": null
+}

@@ -1,0 +1,9 @@
+*dataset/
+*data/
+*.zip
+*.pt
+HubMap-2023-3rd-Place-Solution/
+*.pth
+__pycache__/
+*.log
+*.tif

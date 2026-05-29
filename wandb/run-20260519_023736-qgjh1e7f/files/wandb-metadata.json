@@ -1,0 +1,48 @@
+{
+  "os": "Linux-6.8.0-111-generic-x86_64-with-glibc2.35",
+  "python": "CPython 3.13.12",
+  "startedAt": "2026-05-18T18:37:36.652071Z",
+  "args": [
+    "train",
+    "--fold",
+    "2",
+    "--weights",
+    "yolo26x-seg.pt",
+    "--wandb"
+  ],
+  "program": "/home/ben/nycu_hw/2026version_HuBMAP_Hacking_the_Human_Vasculature/train.py",
+  "codePath": "train.py",
+  "codePathLocal": "train.py",
+  "git": {
+    "remote": "https://github.com/benhsu0828/2026version_HuBMAP_Hacking_the_Human_Vasculature.git",
+    "commit": "d2289cade0f1f31d02d0af86cbfa475934d61c72"
+  },
+  "email": "benten.hsu@gmail.com",
+  "root": "/home/ben/nycu_hw/2026version_HuBMAP_Hacking_the_Human_Vasculature",
+  "host": "CG290-S3063",
+  "executable": "/home/ben/nycu_hw/2026version_HuBMAP_Hacking_the_Human_Vasculature/.venv/bin/python3",
+  "cpu_count": 32,
+  "cpu_count_logical": 64,
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1888559353856",
+      "used": "648454107136"
+    }
+  },
+  "memory": {
+    "total": "808763117568"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "memoryTotal": "102641958912",
+      "cudaCores": 24064,
+      "architecture": "Blackwell",
+      "uuid": "GPU-e5bbd07b-771a-0204-0796-d99ccb86fdf0"
+    }
+  ],
+  "cudaVersion": "13.0",
+  "writerId": "6f18oo22jerwv585wq79zddwvzr1gexq"
+}
