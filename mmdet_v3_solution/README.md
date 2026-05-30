@@ -1,113 +1,93 @@
-# MMDetection v3.x — HuBMAP 細胞/血管實例分割解決方案
+# MMDetection v3 — HuBMAP InternImage-T Cascade 方案
 
-獨立、自包含的一套方案：**Cascade Mask R-CNN + InternImage-T + FPN**，兩階段訓練
-（Dataset2 粗練 → Dataset1 精練），Kaggle T4 上以 FP16 + torch.compile + TTA + 形態學
-後處理做推理。
+**Cascade Mask R-CNN + InternImage-T + FPN**,兩階段訓練(Dataset2 粗練 → Dataset1 精練),
+Kaggle T4 上 FP16 + 6 視角 TTA + 形態學後處理推理。
 
-> 設計取捨：InternImage 的核心算子 DCNv3 預設使用**純 PyTorch 版**（`DCNv3_pytorch`），
-> **零 CUDA 編譯**，因此在 PRO 6000（Blackwell, torch 2.12）與 Kaggle 2×T4 都能直接跑。
-> 若要極致速度，可 `bash setup_env.sh --cuda-build` 編譯官方 ops 並把 config 的
-> `backbone.core_op` 改為 `'DCNv3'`。另附 ConvNeXt-V2-Tiny 切換區塊（見骨架 config 註解）。
+InternImage 核心算子用**純 PyTorch 版** `DCNv3_pytorch`(零 CUDA 編譯) → 本地 Blackwell 與
+Kaggle T4 都能直接跑。極致速度可 `bash setup_env.sh --cuda-build` 編 official ops 並把
+`backbone.core_op` 改 `'DCNv3'`。
 
 ## 目錄
 
 ```
 mmdet_v3_solution/
-├── setup_env.sh        # 建立獨立 uv 環境 .venv-mmdet + 裝 mmcv/mmdet/mmpretrain
-├── run_all.sh          # 一鍵：Stage1 → 自動接力 → Stage2
-├── train.py            # 標準 MMDet v3 訓練 runner
-├── kaggle_infer.py     # Part 3：推理 + TTA + 形態學 + RLE 提交
-├── models/intern_image.py     # InternImage backbone（含純 PyTorch DCNv3）
+├── setup_env.sh                  # 建 conda env mmdet-v3-env(py3.11 + torch2.8+cu128 + 編 mmcv 2.1)
+├── run_all.sh                    # 一鍵 Stage1 → Stage2(自動接力)
+├── train.py                      # 訓練入口(含 Albu + torch.load monkey-patch)
+├── kaggle_infer.py               # Kaggle 推理:TTA + 形態學 + RLE
+├── package_for_kaggle.sh         # 打包成 Kaggle dataset(wheels + mmcv source tarball + ckpt)
+├── hubmap_internimage_infer.ipynb # Kaggle 推理 notebook(7 cells,離線 submit 友善)
+├── models/intern_image.py        # InternImage backbone(純 PyTorch DCNv3)
 ├── configs/
 │   ├── _base_/default_runtime.py
-│   ├── cascade_mask_rcnn_internimage_t_fpn.py  # Part 1：模型骨架
-│   ├── stage1_dataset2_pretrain.py             # Stage1：輕度 aug, lr 2e-4
-│   └── stage2_dataset1_finetune.py             # Stage2：重度 aug, lr 1e-4→1e-7
-└── tools/prepare_coco.py       # 產生 COCO json
+│   ├── cascade_mask_rcnn_internimage_t_fpn.py    # 骨架
+│   ├── stage1_dataset2_pretrain.py               # 輕度 aug,lr 2e-4
+│   └── stage2_dataset1_finetune.py               # 重度 aug,lr 1e-4→1e-7
+└── tools/prepare_coco.py         # 產 COCO json
 ```
 
-## 1. 環境（uv 專案式）
-
-依賴都宣告在 `pyproject.toml`，安裝走 `uv sync`（不用 pip）。
+## 快速開始
 
 ```bash
-cd mmdet_v3_solution
-bash setup_env.sh                 # 內部執行 uv sync，環境建在 .venv-mmdet
-UV_VENV_CLEAR=1 bash setup_env.sh # 砍掉重建
-```
-結尾自檢會印出 `InternImage registered -> <class 'models.intern_image.InternImage'>`。
+# 1. 建環境(conda env mmdet-v3-env;source build mmcv 對齊 Blackwell + torch 2.8 ABI)
+bash setup_env.sh
 
-- 換 CUDA runtime：改 `pyproject.toml` 的 `[[tool.uv.index]]` url（`cu128`→`cu126`…）
-  與 `torch`/`torchvision` 版本。
-- **重要**：torch wheel 內建 CUDA runtime（執行 torch 不需本機 toolkit），但 `mmcv`
-  full 版會**從原始碼編譯** CUDA ops，需要本機 `nvcc` 且版本與 torch 的 CUDA runtime
-  相容（例如 `+cu128` 需 CUDA 12.8 toolkit）。若本機 nvcc 版本不符（如 11.5），請先裝
-  對應 CUDA toolkit，或改用 OpenMMLab devel 容器編譯。
-
-## 2. 準備資料（COCO 格式）
-
-```bash
-.venv-mmdet/bin/python tools/prepare_coco.py \
+# 2. 產資料(COCO json + 圖檔符號連結)
+/home/ben/miniconda3/envs/mmdet-v3-env/bin/python tools/prepare_coco.py \
     --polygons ../polygons.jsonl --tile-meta ../tile_meta.csv --out-dir ../data
-```
-產生 `dtrain0i.json`（Dataset1 train）、`dval0i.json`（val）、`dtrain_dataset2.json`
-（Dataset2）。影像目錄由 config 的 `img_prefix='../data/train'` 指定，請依實際調整。
 
-## 3. 兩階段訓練（一鍵）
-
-```bash
-# 完整：建環境 + Stage1(10ep) + Stage2(20ep)，全程 AMP
-bash run_all.sh
-
-# 已建好環境後重跑
+# 3. 訓練(Stage1 10ep + Stage2 20ep,全程 AMP)
 bash run_all.sh --skip-install
-
-# smoke test：各 1 epoch，驗證接力/AMP/loss
-bash run_all.sh --skip-install --epochs1 1 --epochs2 1
-
-# 只跑 Stage2 並指定 Stage1 權重
-bash run_all.sh --skip-install --stage 2 \
-    --stage1-ckpt work_dirs/stage1/best_coco_segm_mAP_epoch_10.pth
-
-# 訓練時開 torch.compile
-bash run_all.sh --skip-install --compile
 ```
-最終權重在 `work_dirs/stage2/`。
 
-| 階段 | 資料 | epoch | lr (AdamW) | scheduler | 增強 |
-|------|------|-------|-----------|-----------|------|
-| Stage1 粗練 | Dataset2（弱標註） | 10 | 2e-4 | Cosine→2e-5 | 輕度（翻轉 + 小幅仿射）|
-| Stage2 精練 | Dataset1（乾淨） | 20 | 1e-4 | Cosine→1e-7 | 重度（AutoAugment + Albu Elastic/Rotate90）|
+最終權重在 `work_dirs/stage2/best_coco_segm_mAP_epoch_X.pth`。
 
-## 4. 推理（Kaggle）
+| 階段 | 資料 | epoch | lr | scheduler | aug |
+|---|---|---|---|---|---|
+| Stage1 | Dataset2(髒) | 10 | 2e-4 | Cosine→2e-5 | ShiftScaleRotate |
+| Stage2 | Dataset1(乾淨) | 20 | 1e-4 | Cosine→1e-7 | AutoAugment + Albu Elastic + FilterAnnotations |
 
+`bash run_all.sh --help` 看 `--epochs1/2 --stage --compile --stage1-ckpt` 等旗標。
+
+## 推理 + 上 Kaggle
+
+### 本地測試
 ```bash
-.venv-mmdet/bin/python kaggle_infer.py \
+.../mmdet-v3-env/bin/python kaggle_infer.py \
     --config configs/stage2_dataset1_finetune.py \
-    --checkpoint work_dirs/stage2/best_coco_segm_mAP_epoch_20.pth \
-    --img-dir /kaggle/input/<comp>/test \
-    --out submission.csv
+    --checkpoint work_dirs/stage2/best_coco_segm_mAP_epoch_X.pth \
+    --img-dir <test_dir> --out submission.csv --no-compile
 ```
-內含：FP16 autocast、torch.compile（失敗自動 fallback）、6 視角 TTA
-（orig/hflip/vflip/rot90/180/270）、形態學開運算（腐蝕→膨脹）+ 移除小碎片、
-COCO RLE→zlib→base64 提交（只輸出 blood_vessel）。
 
-## 5. 打包到 Kaggle（離線）
+### 打包並上傳 Kaggle dataset
+```bash
+bash package_for_kaggle.sh                              # 全自動 staging → weights_to_upload_v3/
+kaggle datasets create  -p weights_to_upload_v3 --dir-mode zip       # 第一次
+kaggle datasets version -p weights_to_upload_v3 --dir-mode zip -m v2 # 後續更新
+```
 
-Kaggle Notebook 無外網，需把相依與權重做成 Dataset 後離線安裝：
-1. 在與 Kaggle 同款 CUDA/torch 的環境用 `pip download` 或 `mim download` 收集
-   mmengine / mmcv / mmdet / mmpretrain / pycocotools wheels。
-2. 把 wheels + `models/` + `configs/` + 訓練好的 `*.pth` 上傳為 Kaggle Dataset。
-3. Notebook 第一格 `pip install --no-index --find-links=<dataset_wheels> ...`，
-   再把本資料夾加入 `sys.path`，即可呼叫 `kaggle_infer.py` 的函式。
-   （可參考專案根目錄既有的 `package_for_kaggle.sh` 與 `ultra_wheels/` 作法。）
-> 用 `core_op='DCNv3_pytorch'` 時**完全不需**上傳任何編譯好的 CUDA 擴充，最省事。
+### Kaggle Notebook(離線 submit 友善)
+
+⚠️ **必須 fork 2024 年的舊 notebook 繼承凍結環境**(py3.10 + torch 2.1.2),不能用 Kaggle latest
+(py3.12 + torch 2.10 的 mmcv wheel 全部 ABI 不合)。
+
+把本地 `hubmap_internimage_infer.ipynb` 7 個 cell 貼到 fork 出的 notebook,Add Data 加你的
+`hubmap-internimage-cascade` + 比賽 dataset → cell 3 會白名單裝 wheel + 從本地 tarball
+source build mmcv(對齊 Kaggle 的新 GCC ABI),整段過程**無需網路**,Submit Internet OFF 可直接跑。
+
+## 已知坑(都已寫進程式碼,提醒用)
+
+| 位置 | 修法 | 為什麼 |
+|---|---|---|
+| [train.py:18-72](train.py#L18-L72) | `Albu._postprocess_results` monkey-patch | mmdet 3.3.0 順序錯,空 idx_mapper 噴 IndexError |
+| [train.py:75-91](train.py#L75-L91) | `torch.load(weights_only=False)` monkey-patch | torch 2.6+ 預設改 True,擋下 mmengine 的 HistoryBuffer |
+| [stage2_dataset1_finetune.py:55-62](configs/stage2_dataset1_finetune.py#L55-L62) | `FilterAnnotations(min_gt_bbox_wh=(2,2), keep_empty=True)` 插在 Albu 前 | albu 1.3+ 嚴格 check_bbox,AutoAugment 把 bbox 推出畫面會炸 |
+| [setup_env.sh:80-87](setup_env.sh#L80-L87) | mmcv 從 git tag 裝(`mmcv @ git+...@v2.1.0` + `--no-binary mmcv`) | OpenMMLab PyPI 只發 wheel 沒 sdist,`--no-binary` 沒效;必須走 git 才會 source build |
+| [Kaggle notebook cell 3](hubmap_internimage_infer.ipynb) | 白名單裝 wheel + 從 mmcv_src/ tarball source build | 不蓋 Kaggle 預裝科學 stack(numpy/scipy);對齊 Kaggle 新 ABI;離線可跑 |
 
 ## 注意事項
 
-- 須從 `mmdet_v3_solution/` 目錄執行，讓 `custom_imports=['models']` 能找到 backbone。
-- 切 ConvNeXt-V2-Tiny：見 `configs/cascade_mask_rcnn_internimage_t_fpn.py` 內註解，
-  記得把 neck `in_channels` 改成 `[96,192,384,768]`。
-- batch_size 預設 2（1024 解析度 + Cascade）。顯存夠可調大；T4 推理建議單張處理。
-- Stage2 的 Albu `ElasticTransform` 後 bbox 由角點近似；alpha 已設溫和值，主要保留
-  mask 邊界細節，對 Cascade 影響可忽略。
+- **必須從 `mmdet_v3_solution/` 執行**,讓 `custom_imports=['models']` 找得到 backbone
+- `batch_size=2` 預設(1024² + Cascade),顯存夠可調大;run_all.sh 支援 `--cfg-options train_dataloader.batch_size=8`
+- 切 ConvNeXt-V2-Tiny:見 `configs/cascade_mask_rcnn_internimage_t_fpn.py` 註解,記得改 neck `in_channels`
+- 純 `DCNv3_pytorch` → 不需上傳任何編好的 CUDA ops 到 Kaggle

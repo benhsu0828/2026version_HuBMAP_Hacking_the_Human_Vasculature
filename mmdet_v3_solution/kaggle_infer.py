@@ -175,9 +175,13 @@ def build_model(config, checkpoint, device='cuda', use_compile=True):
 
 
 @torch.no_grad()
-def infer_one_tile(model, img, score_thr=0.3, mask_thr=0.5, device='cuda'):
+def infer_one_tile(model, img, score_thr=0.001, mask_thr=0.5, min_area=10,
+                   device='cuda'):
     """對單張 512x512 tile 做 6 視角 TTA 推理 + 集成 + 後處理。
-    回傳 list[ (mask(bool 512x512), score) ]，僅 blood_vessel(label 0)。"""
+    回傳 list[ {mask(bool 512x512), score, box[x1,y1,x2,y2] 512px} ]，僅 blood_vessel(label 0)。
+
+    注意：score_thr 預設 0.001（不是 0.3）。HuBMAP 是 mAP@IoU0.6 按 confidence 積分
+    PR 曲線，丟掉低信心 TP 會直接砍掉高 recall 區段的分數。WBF/下游再依需要過濾。"""
     pooled = []
     for mode in TTA_MODES:
         timg = _tta_forward(img, mode)
@@ -207,11 +211,26 @@ def infer_one_tile(model, img, score_thr=0.3, mask_thr=0.5, device='cuda'):
     out = []
     for inst in kept:
         m = morphological_opening(inst['mask'], ksize=3, iterations=1)
-        m = remove_small(m, min_area=10)
+        if min_area > 0:
+            m = remove_small(m, min_area=min_area)
         if m.sum() == 0:
             continue
-        out.append((m, inst['score']))
+        box = mask_to_bbox(m)            # 後處理後重算 box（512px）
+        if box is None:
+            continue
+        out.append(dict(mask=m, score=inst['score'], box=box.tolist()))
     return out
+
+
+def _mask_to_coco_rle(mask):
+    """bool/uint8 512x512 → COCO 壓縮 RLE dict（counts 為 bytes，pickle 友善）。
+    下游 fusion notebook 用 pycocotools.mask.decode(rle) 還原成 512x512 uint8。
+
+    注意：coco_mask 是 pycocotools 低階 `_mask` 模組，encode 要 3D (H,W,N) 輸入、
+    回傳 list（對齊本檔 encode_binary_mask 的寫法），不能傳 2D。"""
+    m = mask.reshape(mask.shape[0], mask.shape[1], 1).astype(np.uint8)
+    m = np.asfortranarray(m)
+    return coco_mask.encode(m)[0]   # 取 [0]；counts 維持 bytes
 
 
 def main():
@@ -220,7 +239,12 @@ def main():
     ap.add_argument('--checkpoint', required=True)
     ap.add_argument('--img-dir', required=True, help='測試 tile 影像資料夾')
     ap.add_argument('--out', default='submission.csv')
-    ap.add_argument('--score-thr', type=float, default=0.3)
+    # 預設 0.001：AP 指標要保留低信心 TP，不可設 0.3（會砍掉高 recall 區段）
+    ap.add_argument('--score-thr', type=float, default=0.001)
+    ap.add_argument('--min-area', type=int, default=10,
+                    help='後處理移除小於此面積的連通域；設 0 不過濾')
+    ap.add_argument('--pkl-out', default=None,
+                    help='另存 ensemble 用 pkl（keyed by img_id），給跨版本 WBF 用')
     ap.add_argument('--no-compile', action='store_true')
     args = ap.parse_args()
 
@@ -232,22 +256,37 @@ def main():
     files = sorted(f for f in os.listdir(args.img_dir)
                    if f.lower().endswith(exts))
     rows = []
+    pkl_dict = {} if args.pkl_out else None
     for fname in files:
         tid = osp.splitext(fname)[0]
         img = cv2.imread(osp.join(args.img_dir, fname))  # BGR；DetDataPreprocessor 內 bgr_to_rgb
         preds = infer_one_tile(model, img, score_thr=args.score_thr,
-                               device=device)
+                               min_area=args.min_area, device=device)
         parts = []
-        for m, s in preds:
-            parts.append(f'0 {s:.4f} {encode_binary_mask(m)}')
+        for p in preds:
+            parts.append(f"0 {p['score']:.4f} {encode_binary_mask(p['mask'])}")
         rows.append(dict(id=tid, height=TILE, width=TILE,
                          prediction_string=' '.join(parts)))
+        if pkl_dict is not None:
+            # ensemble pkl：mask 存 COCO RLE（精簡），box 512px，score 原值
+            pkl_dict[tid] = [
+                dict(rle=_mask_to_coco_rle(p['mask']),
+                     score=p['score'], box=p['box'])
+                for p in preds
+            ]
         print(f'{tid}: {len(parts)} instances')
 
     pd.DataFrame(rows, columns=['id', 'height', 'width',
                                 'prediction_string']).to_csv(
         args.out, index=False)
     print(f'寫入 {args.out}（{len(rows)} 列）')
+
+    if pkl_dict is not None:
+        import pickle
+        with open(args.pkl_out, 'wb') as f:
+            pickle.dump(pkl_dict, f)
+        n_inst = sum(len(v) for v in pkl_dict.values())
+        print(f'寫入 {args.pkl_out}（{len(pkl_dict)} 圖，共 {n_inst} instances）')
 
 
 if __name__ == '__main__':
