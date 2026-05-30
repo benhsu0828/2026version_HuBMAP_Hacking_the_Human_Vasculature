@@ -79,6 +79,8 @@ The reproduced baseline follows the public first-place release. Its inference no
 \]
 Each stream outputs bounding boxes, scores, and labels. These boxes are fused by Weighted Boxes Fusion (WBF)~\cite{wbf}. The fused boxes are then passed into a Mask R-CNN style mask branch from \texttt{m1i} to produce final instance masks. The local workflow notes record this legacy MMDetection baseline as reproducing a Kaggle score of about 0.589.
 
+For comparison, the original first-place author reported 0.589 private and 0.317 public. Our closest first-place-only rerun used the released first-place models with TTA and scored 0.577 private and 0.316 public. Therefore, the reproduced baseline is close on public score but about 0.012 lower on private score.
+
 \subsection{Data processing}
 
 For MMDetection experiments, annotations are converted from \texttt{polygons.jsonl} to COCO format. Dataset 1 is split spatially within WSI 1 and WSI 2 to create \texttt{dtrain0i.json} and \texttt{dval0i.json}. Dataset 2 is exported as \texttt{dtrain\_dataset2.json} for pretraining.
@@ -110,7 +112,7 @@ This makes YOLO a drop-in WBF stream. In the modified WBF cell, the four YOLO st
 
 \subsection{Results and analysis}
 
-The YOLO-only validation results were reasonable for a lightweight independent stream, but they did not beat the reproduced first-place ensemble. The best local fold-level YOLO mask mAP@50:95 ranged from 0.137 to 0.215, as shown in Table~\ref{tab:yolo_folds}. The Kaggle notebook notes also indicate that the YOLO-augmented WBF submission was lower than the legacy MMDetection-only baseline.
+The YOLO-only validation results were reasonable for a lightweight independent stream, but they did not beat the reproduced first-place ensemble on private leaderboard. The best local fold-level YOLO mask mAP@50:95 ranged from 0.137 to 0.215, as shown in Table~\ref{tab:yolo_folds}. The full Kaggle submission records are summarized in Table~\ref{tab:kaggle_submissions}.
 
 \begin{table}[H]
     \centering
@@ -129,7 +131,32 @@ The YOLO-only validation results were reasonable for a lightweight independent s
     \label{tab:yolo_folds}
 \end{table}
 
-The negative result is still useful. First, YOLO did not provide enough diversity: many mistakes overlapped with the existing detector ensemble, especially on ambiguous vessel-like structures. Second, its bounding boxes were not consistently better than the Cascade/Mask R-CNN family. Since the final pipeline re-predicts masks from fused boxes, box quality dominates the final mAP. Third, YOLO masks can be visually sharp after padding, but better masks do not help if the corresponding boxes do not improve WBF clusters. Therefore, the experiment suggests that adding a segmentation stream is not sufficient; the stream must improve localization diversity.
+\begin{table}[H]
+    \centering
+    \scriptsize
+    \begin{adjustbox}{width=\linewidth}
+    \begin{tabular}{p{0.34\linewidth}p{0.43\linewidth}cc}
+        \toprule
+        Submission setting & Inference / fusion details & Private & Public \\
+        \midrule
+        Original first-place author & Public Kaggle write-up score & 0.589 & 0.317 \\
+        First-place models only & Released first-place models with TTA inference & 0.577 & 0.316 \\
+        YOLO26-Seg only & Four-fold YOLO26, direct inference, ensemble mask-NMS & 0.420 & 0.387 \\
+        YOLO26-Seg only & Four-fold YOLO26, 4-way TTA \{\texttt{orig}, \texttt{hflip}, \texttt{vflip}, \texttt{rot90}\}, WBF and weighted mask average & 0.515 & 0.446 \\
+        YOLO26-Seg + MedSAM-2 & YOLO prompts with MedSAM-2 LoRA and vendored MedSAM2 & 0.258 & 0.287 \\
+        First-place + YOLO26-Seg & 10 first-place streams plus 4 YOLO streams, WBF weights \([2,2,2,2,1,1,1,1,2,2,2,2,2,2]\) & 0.572 & 0.304 \\
+        First-place + YOLO26-Seg & Same 14-stream WBF with YOLO weights reduced to \([0.5,0.5,0.5,0.5]\) for the last four streams & 0.563 & 0.308 \\
+        First-place + YOLO26-Seg & Explicit \texttt{streams=14} implementation with YOLO weights \([2,2,2,2]\) & 0.572 & 0.304 \\
+        \bottomrule
+    \end{tabular}
+    \end{adjustbox}
+    \caption{Kaggle submission scores from the tested inference variants.}
+    \label{tab:kaggle_submissions}
+\end{table}
+
+These records clarify the gap between the experiments and the earlier report draft. YOLO26-Seg improved strongly when moving from direct mask-NMS to 4-way TTA with WBF and weighted mask averaging, rising from 0.420 to 0.515 private. However, adding YOLO streams into the first-place WBF did not improve the first-place system: the best 14-stream result was 0.572 private, below both our first-place-only TTA rerun at 0.577 and the author's 0.589. Lowering YOLO weights to 0.5 improved public score slightly but reduced private score to 0.563. The MedSAM-2 refinement branch also underperformed at 0.258 private, suggesting that prompt-driven mask refinement was not robust to the YOLO box distribution in this setup.
+
+The negative result is still useful. First, YOLO did not provide enough diversity: many mistakes overlapped with the existing detector ensemble, especially on ambiguous vessel-like structures. Second, its bounding boxes were not consistently better than the Cascade/Mask R-CNN family. Since the final pipeline re-predicts masks from fused boxes, box quality dominates the final mAP. Third, the YOLO-only WBF/TTA variant looked attractive on public score (0.446 versus 0.316 for our first-place-only TTA rerun), but it was still weaker on private score (0.515 versus 0.577). Therefore, the public leaderboard alone was not reliable for selecting the final system, and adding a segmentation stream is not sufficient; the stream must improve private-set localization diversity.
 
 \section{Experiment 2: Two-stage InternImage Cascade}
 \label{sec:internimage}
@@ -175,16 +202,16 @@ The main reason is architecture mismatch. The referenced multi-stage solution di
 \section{Discussion}
 \label{sec:discussion}
 
-The two experiments show that leaderboard-level instance segmentation is a systems problem, not only a model-choice problem. The first-place pipeline works because it separates responsibilities: many models propose boxes, WBF filters and averages localization evidence, and a strong mask branch converts fused boxes into final masks. This structure also explains why the YOLO experiment did not help. YOLO26-Seg produced masks, but the ensemble bottleneck was box quality and localization diversity.
+The two experiments show that leaderboard-level instance segmentation is a systems problem, not only a model-choice problem. The first-place pipeline works because it separates responsibilities: many models propose boxes, WBF filters and averages localization evidence, and a strong mask branch converts fused boxes into final masks. This structure also explains why the YOLO experiment did not help the final ensemble. YOLO26-Seg produced a reasonable standalone result after WBF/TTA (0.515 private, 0.446 public), but adding it to the first-place streams reduced the private score from our first-place-only 0.577 to 0.572.
 
 The InternImage experiment gives a different lesson. Multi-stage training is useful: Stage 2 improved the local segmentation mAP from 0.130 to 0.440. But borrowing only the training schedule is not enough to reproduce a top solution. Backbone capacity, resolution, label-noise robustness, and ensemble integration all interact. InternImage-T was attractive because it was easier to package and run, especially with a pure PyTorch DCNv3 implementation, but this practical choice also limited its ceiling.
 
-Overall, our best direction remains the reproduced first-place MMDetection ensemble. The YOLO and InternImage experiments are valuable ablations: YOLO tested whether simple diversity improves WBF, while InternImage tested whether Dataset2 pretraining transfers to Dataset1 fine-tuning. Both experiments clarify where future improvements should focus: better box proposals, higher-capacity backbones, stronger WSI-aware validation, and more careful fusion rather than simply adding more segmentation outputs.
+Overall, our best direction remains the reproduced first-place MMDetection ensemble. The YOLO and InternImage experiments are valuable ablations: YOLO tested whether simple diversity improves WBF, while InternImage tested whether Dataset2 pretraining transfers to Dataset1 fine-tuning. The submission gap is now clear: the original author reported 0.589 private, our first-place-only TTA rerun reached 0.577, and the best YOLO-augmented first-place ensemble reached 0.572. Future improvements should therefore focus on better box proposals, higher-capacity backbones, stronger WSI-aware validation, and more careful fusion rather than simply adding more segmentation outputs.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-We reproduced the structure of the HuBMAP first-place solution and explored two extensions. Adding YOLO26x-Seg as a four-fold WBF stream increased system diversity but did not improve the final result, mainly because it did not improve fused bounding boxes. A two-stage Cascade Mask R-CNN with InternImage-T confirmed the benefit of Dataset2 pretraining followed by Dataset1 fine-tuning, but the smaller backbone and single-model setup remained below the reproduced ensemble baseline. The project therefore supports a central conclusion: for this competition, high-quality box localization and ensemble design are more important than mask sharpness alone.
+We reproduced the structure of the HuBMAP first-place solution and explored two extensions. The original first-place score was 0.589 private / 0.317 public, while our first-place-only TTA rerun reached 0.577 / 0.316. YOLO26x-Seg alone improved from 0.420 / 0.387 with direct mask-NMS to 0.515 / 0.446 with 4-way TTA, WBF, and weighted mask averaging, but inserting YOLO into the first-place WBF reduced private score to 0.572. The YOLO + MedSAM-2 branch was worse at 0.258 / 0.287. A two-stage Cascade Mask R-CNN with InternImage-T confirmed the benefit of Dataset2 pretraining followed by Dataset1 fine-tuning, but the smaller backbone and single-model setup remained below the reproduced ensemble baseline. The project therefore supports a central conclusion: for this competition, high-quality box localization and ensemble design are more important than mask sharpness alone.
 
 \bibliographystyle{unsrt}
 \bibliography{references}
