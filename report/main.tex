@@ -167,6 +167,7 @@ The YOLO-only validation results were reasonable for a lightweight independent s
         First-place + YOLO26-Seg & 10 first-place streams plus 4 YOLO streams, WBF weights \([2,2,2,2,1,1,1,1,2,2,2,2,2,2]\) & 0.572 & 0.304 \\
         First-place + YOLO26-Seg & Same 14-stream WBF with YOLO weights reduced to \([0.5,0.5,0.5,0.5]\) for the last four streams & 0.563 & 0.308 \\
         First-place + YOLO26-Seg & Explicit \texttt{streams=14} implementation with YOLO weights \([2,2,2,2]\) & 0.572 & 0.304 \\
+        First-place + YOLO26-Seg (two-stage) & 10 first-place streams plus 4 \emph{two-stage-trained} YOLO streams (Experiment 3), 14-stream WBF, YOLO weights \([2,2,2,2]\) & 0.568 & 0.330 \\
         \bottomrule
     \end{tabular}
     \end{adjustbox}
@@ -243,6 +244,32 @@ For reference, the third-place solution itself scored 0.583 private and 0.619 pu
 
 The main reason it stays below the ensemble is architecture mismatch. The referenced multi-stage solution direction relies on very large transformer-style backbones and detector ensembles. Our InternImage-T model is much smaller and is a different system. A second reason is Dataset 2 noise: a compact model may absorb noisy masks more directly, whereas a larger pretrained backbone can be more robust. Finally, our implementation used only a single InternImage Cascade stream. The first-place baseline derives much of its strength from ensembling and from using a dedicated high-resolution mask re-prediction stage.
 
+\section{Experiment 3: Combining both directions --- a two-stage-trained YOLO stream}
+\label{sec:combined}
+
+\subsection{Motivation}
+
+Experiments 1 and 2 each isolated one idea. Experiment 1 showed that adding a single-stage-trained YOLO stream did not help the first-place ensemble on private leaderboard, and Experiment 2 showed that the third-place two-stage schedule (Dataset 2 pretraining followed by Dataset 1 fine-tuning) is genuinely useful and, in the original third-place system, produces an unusually small public--private gap. This raises a direct cross-over question: if the weakness of the YOLO stream in Experiment 1 was its training recipe rather than its architecture, then training the YOLO stream \emph{itself} with the third-place two-stage schedule should make it a more useful ensemble member.
+
+\subsection{Method}
+
+The \texttt{yolo26\_solution} pipeline ports the third-place two-stage recipe onto YOLO26x-seg~\cite{ultralytics,nischay2023hubmapthird}. Stage 1 pretrains the COCO-initialized YOLO on all of Dataset 2 (1211 noisy tiles) for 15 epochs with AdamW, learning rate $2\times10^{-4}$ warming from a high $2\times10^{-3}$ under a cosine schedule, and light augmentation (rotation up to $30^\circ$, no mixup or copy-paste). Stage 2 loads the Stage 1 weights and fine-tunes per fold on the 422 clean Dataset 1 tiles, using the same four spatial folds as Experiment 1, for 25 epochs with AdamW at $5\times10^{-4}$ annealed cosine to about $5\times10^{-8}$ and heavy augmentation (rotation up to $180^\circ$, mixup 0.1, copy-paste 0.3). Training resolution is $768\times768$, matching the padded-tile preprocessing of Experiment 1, so the only change from Experiment 1 is the two-stage schedule and the extra Dataset 2 pretraining set.
+
+At inference the four folds are combined with 4-fold WBF and 4-way TTA, then fused into the first-place ensemble exactly as in Experiment 1: the same 14-stream WBF (ten first-place streams plus four YOLO streams) with YOLO weights $[2,2,2,2]$.
+
+\subsection{Results and analysis}
+
+The combined system scored 0.568 private and 0.330 public, recorded in Table~\ref{tab:kaggle_submissions} and Figure~\ref{fig:competition_exp3}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\linewidth]{figure/competition_combine_1st_3nd.png}
+    \caption{Kaggle submission of the combined system: the first-place ensemble fused with the two-stage-trained YOLO26x-seg four-fold stream (0.568 private / 0.330 public).}
+    \label{fig:competition_exp3}
+\end{figure}
+
+Compared with the single-stage YOLO fusion (0.572 private / 0.304 public), the two-stage YOLO lowers private slightly by 0.004 but raises public markedly by 0.026, to the highest public score of any first-place-containing variant --- above even our first-place-only rerun (0.316). This dovetails with both earlier experiments. It echoes Experiment 2: because the two-stage YOLO also learned from the broad Dataset 2 WSIs, it suffers less distribution shift and helps the public-like distribution. It also echoes Experiment 1: the private bottleneck is the ensemble's box-localization diversity, not the YOLO training recipe. The first-place ensemble has already nearly saturated private localization, so a differently trained YOLO only shifts the public--private balance instead of adding new private diversity. The cross-over therefore confirms the two independent lessons rather than overturning them: two-stage training improves generalization breadth (public), while ensemble box diversity governs the private score.
+
 \section{Discussion}
 \label{sec:discussion}
 
@@ -250,12 +277,14 @@ The two experiments show that leaderboard-level instance segmentation is a syste
 
 The InternImage experiment gives a different lesson. Multi-stage training is useful: Stage 2 improved the local segmentation mAP from 0.130 to 0.440, and on Kaggle the single stream reached 0.395 private / 0.241 public once the score threshold was kept low. But borrowing only the training schedule is not enough to reproduce a top solution. Backbone capacity, resolution, label-noise robustness, and ensemble integration all interact. InternImage-T was attractive because it was easier to package and run, especially with a pure PyTorch DCNv3 implementation, but this practical choice also limited its ceiling.
 
+Experiment 3 ties these two lessons together. Training the YOLO stream with the third-place two-stage schedule and fusing it into the first-place ensemble pushed the public score to 0.330 --- the highest of any first-place-containing variant --- but private slipped to 0.568. The public leaderboard rewards the broader generalization that two-stage training brings, whereas the private leaderboard rewards box-localization diversity that the ensemble already provides; optimizing one does not automatically improve the other.
+
 Overall, our best direction remains the reproduced first-place MMDetection ensemble. The YOLO and InternImage experiments are valuable ablations: YOLO tested whether simple diversity improves WBF, while InternImage tested whether Dataset2 pretraining transfers to Dataset1 fine-tuning. The submission gap is now clear: the original author reported 0.589 private, our first-place-only TTA rerun reached 0.577, and the best YOLO-augmented first-place ensemble reached 0.572. Future improvements should therefore focus on better box proposals, higher-capacity backbones, stronger WSI-aware validation, and more careful fusion rather than simply adding more segmentation outputs.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-We reproduced the structure of the HuBMAP first-place solution and explored two extensions. The original first-place score was 0.589 private / 0.317 public, while our first-place-only TTA rerun reached 0.577 / 0.316. YOLO26x-Seg alone improved from 0.420 / 0.387 with direct mask-NMS to 0.515 / 0.446 with 4-way TTA, WBF, and weighted mask averaging, but inserting YOLO into the first-place WBF reduced private score to 0.572. The YOLO + MedSAM-2 branch was worse at 0.258 / 0.287. A two-stage Cascade Mask R-CNN with InternImage-T confirmed the benefit of Dataset2 pretraining followed by Dataset1 fine-tuning, scoring 0.395 private / 0.241 public at a low score threshold (versus 0.372 / 0.179 at threshold 0.3), but the smaller backbone and single-model setup remained below the reproduced ensemble baseline. The project therefore supports a central conclusion: for this competition, high-quality box localization and ensemble design are more important than mask sharpness alone.
+We reproduced the structure of the HuBMAP first-place solution and explored two extensions. The original first-place score was 0.589 private / 0.317 public, while our first-place-only TTA rerun reached 0.577 / 0.316. YOLO26x-Seg alone improved from 0.420 / 0.387 with direct mask-NMS to 0.515 / 0.446 with 4-way TTA, WBF, and weighted mask averaging, but inserting YOLO into the first-place WBF reduced private score to 0.572. The YOLO + MedSAM-2 branch was worse at 0.258 / 0.287. A two-stage Cascade Mask R-CNN with InternImage-T confirmed the benefit of Dataset2 pretraining followed by Dataset1 fine-tuning, scoring 0.395 private / 0.241 public at a low score threshold (versus 0.372 / 0.179 at threshold 0.3), but the smaller backbone and single-model setup remained below the reproduced ensemble baseline. Finally, combining both directions --- training the YOLO stream with the third-place two-stage schedule and fusing it into the first-place ensemble --- reached 0.330 public, the highest of any first-place-containing variant, but only 0.568 private, confirming that the two directions optimize complementary targets. The project therefore supports a central conclusion: for this competition, high-quality box localization and ensemble design are more important than mask sharpness alone.
 
 
 \bibliographystyle{unsrt}
