@@ -1,36 +1,92 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{hubmap2023}
 {HuBMAP} and Kaggle.
 \newblock {HuBMAP} - hacking the human vasculature.
-\newblock \url{https://www.kaggle.com/c/hubmap-hacking-the-human-vasculature},
-  2023.
+\newblock \url{https://www.kaggle.com/c/hubmap-hacking-the-human-vasculature}, 2023.
+
+\bibitem{rtmdet}
+Chengqi Lyu, Wenwei Zhang, Haian Huang, Yue Zhou, Yudong Wang, Yanyi Liu, Shilong Zhang, and Kai Chen.
+\newblock {RTMDet}: An empirical study of designing real-time object detectors, 2022.
+
+\bibitem{yolox}
+Zheng Ge, Songtao Liu, Feng Wang, Zeming Li, and Jian Sun.
+\newblock {YOLOX}: Exceeding {YOLO} series in 2021, 2021.
+
+\bibitem{maskrcnn}
+Kaiming He, Georgia Gkioxari, Piotr Dollar, and Ross Girshick.
+\newblock Mask {R-CNN}.
+\newblock In {\em Proceedings of the IEEE International Conference on Computer Vision (ICCV)}, pages 2961--2969, 2017.
+
+\bibitem{swin}
+Ze~Liu, Yutong Lin, Yue Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin, and Baining Guo.
+\newblock {Swin Transformer}: Hierarchical vision transformer using shifted windows.
+\newblock In {\em Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)}, pages 10012--10022, 2021.
+
+\bibitem{wbf}
+Roman Solovyev, Weimin Wang, and Tatiana Gabruseva.
+\newblock Weighted boxes fusion: Ensembling boxes from different object detection models, 2019.
+
+\bibitem{vitadapter}
+Zhe Chen, Yuchen Duan, Wenhai Wang, Junjun He, Tong Lu, Jifeng Dai, and Yu~Qiao.
+\newblock Vision transformer adapter for dense predictions.
+\newblock In {\em International Conference on Learning Representations (ICLR)}, 2023.
+
+\bibitem{cbnetv2}
+Tingting Liang, Xiaojie Chu, Yudong Liu, Yongtao Wang, Zhi Tang, Wei Chu, Jingdong Chen, and Haibin Ling.
+\newblock {CBNetV2}: A composite backbone network architecture for object detection.
+\newblock {\em IEEE Transactions on Image Processing}, 31:6893--6906, 2022.
+
+\bibitem{detectors}
+Siyuan Qiao, Liang-Chieh Chen, and Alan Yuille.
+\newblock {DetectoRS}: Detecting objects with recursive feature pyramid and switchable atrous convolution.
+\newblock In {\em Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, pages 10213--10224, 2021.
+
+\bibitem{htc}
+Kai Chen, Jiangmiao Pang, Jiaqi Wang, Yu~Xiong, Xiaoxiao Li, Shuyang Sun, Wansen Feng, Ziwei Liu, Jianping Shi, Wanli Ouyang, Chen~Change Loy, and Dahua Lin.
+\newblock Hybrid task cascade for instance segmentation.
+\newblock In {\em Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, pages 4974--4983, 2019.
+
+\bibitem{resnext}
+Saining Xie, Ross Girshick, Piotr Dollar, Zhuowen Tu, and Kaiming He.
+\newblock Aggregated residual transformations for deep neural networks.
+\newblock In {\em Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, pages 1492--1500, 2017.
+
+\bibitem{resnet}
+Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+\newblock Deep residual learning for image recognition.
+\newblock In {\em Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, pages 770--778, 2016.
+
+\bibitem{ultralytics}
+{Ultralytics}.
+\newblock Ultralytics {YOLO}.
+\newblock \url{https://github.com/ultralytics/ultralytics}, 2026.
+
+\bibitem{internimage}
+Wenhai Wang, Jifeng Dai, Zhe Chen, Zhenhang Huang, Zhiqi Li, Xizhou Zhu, Xiaowei Hu, Tong Lu, Lewei Lu, Hongsheng Li, Xiaogang Wang, and Yu~Qiao.
+\newblock {InternImage}: Exploring large-scale vision foundation models with deformable convolutions.
+\newblock In {\em Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, 2023.
+
+\bibitem{cascade_rcnn}
+Zhaowei Cai and Nuno Vasconcelos.
+\newblock Cascade {R-CNN}: Delving into high quality object detection.
+\newblock In {\em Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, pages 6154--6162, 2018.
+
+\bibitem{fpn}
+Tsung-Yi Lin, Piotr Dollar, Ross Girshick, Kaiming He, Bharath Hariharan, and Serge Belongie.
+\newblock Feature pyramid networks for object detection.
+\newblock In {\em Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, pages 2117--2125, 2017.
 
 \bibitem{tascj2023hubmapfirst}
 tascj.
 \newblock 1st place solution.
-\newblock
-  \url{https://www.kaggle.com/c/hubmap-hacking-the-human-vasculature/discussion/429060},
-  2023.
+\newblock \url{https://www.kaggle.com/c/hubmap-hacking-the-human-vasculature/discussion/429060}, 2023.
 \newblock Kaggle competition write-up.
 
 \bibitem{nischay2023hubmapthird}
 Nischay Dhankhar.
 \newblock 3rd place solution: How to properly utilise noisy annotations.
-\newblock
-  \url{https://www.kaggle.com/c/hubmap-hacking-the-human-vasculature/discussion/430242},
-  2023.
+\newblock \url{https://www.kaggle.com/c/hubmap-hacking-the-human-vasculature/discussion/430242}, 2023.
 \newblock Kaggle competition write-up.
-
-\bibitem{wbf}
-Roman Solovyev, Weimin Wang, and Tatiana Gabruseva.
-\newblock Weighted boxes fusion: Ensembling boxes from different object
-  detection models, 2019.
-
-\bibitem{cascade_rcnn}
-Zhaowei Cai and Nuno Vasconcelos.
-\newblock Cascade {R-CNN}: Delving into high quality object detection.
-\newblock In {\em Proceedings of the IEEE Conference on Computer Vision and
-  Pattern Recognition (CVPR)}, pages 6154--6162, 2018.
 
 \end{thebibliography}

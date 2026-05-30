@@ -2,58 +2,94 @@
 \providecommand\hyper@newdestlabel[2]{}
 \providecommand*\HyPL@Entry[1]{}
 \citation{hubmap2023}
-\citation{tascj2023hubmapfirst}
-\citation{tascj2023hubmapfirst}
-\citation{nischay2023hubmapthird}
-\citation{nischay2023hubmapthird}
-\citation{nischay2023hubmapthird}
+\citation{rtmdet}
+\citation{yolox}
+\citation{maskrcnn}
+\citation{swin}
+\citation{wbf}
+\citation{vitadapter}
+\citation{cbnetv2}
+\citation{detectors}
+\citation{htc}
+\citation{resnext}
+\citation{resnet}
+\citation{ultralytics}
+\citation{internimage}
 \HyPL@Entry{0<</S/D>>}
 \providecommand \oddpage@label [2]{}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
 \newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Top Solutions Analysis}{1}{section.2}\protected@file@percent }
-\newlabel{sec:top}{{2}{1}{Top Solutions Analysis}{section.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}First-place direction: WSI-aware heterogeneous ensembles}{1}{subsection.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Third-place direction: multi-stage training}{1}{subsection.2.2}\protected@file@percent }
-\citation{nischay2023hubmapthird}
-\citation{nischay2023hubmapthird}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Third-place multi-stage training diagram from the Kaggle write-up~\cite  {nischay2023hubmapthird}. The central idea is to use Dataset 2 for broad noisy pretraining and Dataset 1 for clean high-resolution fine-tuning.}}{2}{figure.caption.1}\protected@file@percent }
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:third_multistage}{{1}{2}{Third-place multi-stage training diagram from the Kaggle write-up~\cite {nischay2023hubmapthird}. The central idea is to use Dataset 2 for broad noisy pretraining and Dataset 1 for clean high-resolution fine-tuning}{figure.caption.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Third-place pseudo-label extension from the Kaggle write-up~\cite  {nischay2023hubmapthird}. Ensemble predictions are thresholded into Dataset 3 pseudo labels and then folded back into another multi-stage training pass.}}{2}{figure.caption.2}\protected@file@percent }
-\newlabel{fig:third_pseudo}{{2}{2}{Third-place pseudo-label extension from the Kaggle write-up~\cite {nischay2023hubmapthird}. Ensemble predictions are thresholded into Dataset 3 pseudo labels and then folded back into another multi-stage training pass}{figure.caption.2}{}}
-\citation{wbf}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Baseline Reproduction}{3}{section.3}\protected@file@percent }
-\newlabel{sec:baseline}{{3}{3}{Baseline Reproduction}{section.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Baseline A: first-place MMDetection ensemble}{3}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Data processing}{3}{subsection.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Experiment 1: YOLO26-Seg Ensemble}{3}{section.4}\protected@file@percent }
-\newlabel{sec:yolo}{{4}{3}{Experiment 1: YOLO26-Seg Ensemble}{section.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Motivation}{3}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Method}{3}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Methodology and related work}{1}{section.2}\protected@file@percent }
+\newlabel{sec:top}{{2}{1}{Methodology and related work}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}First-place models}{1}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Third-place models}{1}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Our models}{1}{subsection.2.3}\protected@file@percent }
 \citation{cascade_rcnn}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Results and analysis}{4}{subsection.4.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Best local validation metrics of the YOLO26x-Seg folds from \texttt  {runs/seg/fold*/results.csv}.}}{4}{table.caption.3}\protected@file@percent }
-\newlabel{tab:yolo_folds}{{1}{4}{Best local validation metrics of the YOLO26x-Seg folds from \texttt {runs/seg/fold*/results.csv}}{table.caption.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Kaggle submission scores from the tested inference variants.}}{4}{table.caption.4}\protected@file@percent }
-\newlabel{tab:kaggle_submissions}{{2}{4}{Kaggle submission scores from the tested inference variants}{table.caption.4}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Experiment 2: Two-stage InternImage Cascade}{4}{section.5}\protected@file@percent }
-\newlabel{sec:internimage}{{5}{4}{Experiment 2: Two-stage InternImage Cascade}{section.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Motivation}{4}{subsection.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Method}{4}{subsection.5.2}\protected@file@percent }
+\citation{maskrcnn}
+\citation{fpn}
+\citation{tascj2023hubmapfirst}
+\citation{tascj2023hubmapfirst}
+\citation{nischay2023hubmapthird}
+\citation{nischay2023hubmapthird}
+\citation{nischay2023hubmapthird}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}First-place direction: WSI-aware heterogeneous ensembles}{2}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Third-place direction: multi-stage training}{2}{subsection.2.5}\protected@file@percent }
+\citation{nischay2023hubmapthird}
+\citation{nischay2023hubmapthird}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Third-place multi-stage training diagram from the Kaggle write-up~\cite  {nischay2023hubmapthird}. The central idea is to use Dataset 2 for broad noisy pretraining and Dataset 1 for clean high-resolution fine-tuning.}}{3}{figure.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:third_multistage}{{1}{3}{Third-place multi-stage training diagram from the Kaggle write-up~\cite {nischay2023hubmapthird}. The central idea is to use Dataset 2 for broad noisy pretraining and Dataset 1 for clean high-resolution fine-tuning}{figure.caption.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Third-place pseudo-label extension from the Kaggle write-up~\cite  {nischay2023hubmapthird}. Ensemble predictions are thresholded into Dataset 3 pseudo labels and then folded back into another multi-stage training pass.}}{3}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:third_pseudo}{{2}{3}{Third-place pseudo-label extension from the Kaggle write-up~\cite {nischay2023hubmapthird}. Ensemble predictions are thresholded into Dataset 3 pseudo labels and then folded back into another multi-stage training pass}{figure.caption.2}{}}
+\citation{wbf}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Experiment 1: First-place direction --- adding a YOLO26-Seg stream}{4}{section.3}\protected@file@percent }
+\newlabel{sec:yolo}{{3}{4}{Experiment 1: First-place direction --- adding a YOLO26-Seg stream}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Motivation}{4}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Reproduced first-place ensemble baseline}{4}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Data processing}{4}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Method}{4}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Results and analysis}{4}{subsection.3.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Best local validation metrics of the YOLO26x-Seg folds from \texttt  {runs/seg/fold*/results.csv}.}}{5}{table.caption.3}\protected@file@percent }
+\newlabel{tab:yolo_folds}{{1}{5}{Best local validation metrics of the YOLO26x-Seg folds from \texttt {runs/seg/fold*/results.csv}}{table.caption.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Kaggle submission scores from the tested inference variants.}}{5}{table.caption.4}\protected@file@percent }
+\newlabel{tab:kaggle_submissions}{{2}{5}{Kaggle submission scores from the tested inference variants}{table.caption.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Kaggle submission scores from the tested inference variants.}}{5}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:competition_score}{{3}{5}{Kaggle submission scores from the tested inference variants}{figure.caption.5}{}}
+\citation{cascade_rcnn}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experiment 2: Third-place direction --- two-stage InternImage Cascade}{6}{section.4}\protected@file@percent }
+\newlabel{sec:internimage}{{4}{6}{Experiment 2: Third-place direction --- two-stage InternImage Cascade}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Motivation}{6}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Data processing}{6}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Method}{6}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Results and analysis}{6}{subsection.4.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Local MMDetection validation metrics on \texttt  {dval0i}. These are not directly comparable to Kaggle private leaderboard scores.}}{6}{table.caption.6}\protected@file@percent }
+\newlabel{tab:internimage}{{3}{6}{Local MMDetection validation metrics on \texttt {dval0i}. These are not directly comparable to Kaggle private leaderboard scores}{table.caption.6}{}}
+\citation{nischay2023hubmapthird}
 \bibstyle{unsrt}
 \bibdata{references}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Results and analysis}{5}{subsection.5.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Local MMDetection validation metrics on \texttt  {dval0i}. These are not directly comparable to Kaggle private leaderboard scores.}}{5}{table.caption.5}\protected@file@percent }
-\newlabel{tab:internimage}{{3}{5}{Local MMDetection validation metrics on \texttt {dval0i}. These are not directly comparable to Kaggle private leaderboard scores}{table.caption.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{5}{section.6}\protected@file@percent }
-\newlabel{sec:discussion}{{6}{5}{Discussion}{section.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{5}{section.7}\protected@file@percent }
-\newlabel{sec:conclusion}{{7}{5}{Conclusion}{section.7}{}}
 \bibcite{hubmap2023}{1}
-\bibcite{tascj2023hubmapfirst}{2}
-\bibcite{nischay2023hubmapthird}{3}
-\bibcite{wbf}{4}
-\bibcite{cascade_rcnn}{5}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Kaggle leaderboard scores of the two-stage InternImage-T Cascade Mask R-CNN, using FP16, six-view TTA, and morphological post-processing. Lowering the score threshold from $0.3$ to the code default $0.001$ improves both private and public scores.}}{7}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:competition_exp2_score}{{4}{7}{Kaggle leaderboard scores of the two-stage InternImage-T Cascade Mask R-CNN, using FP16, six-view TTA, and morphological post-processing. Lowering the score threshold from $0.3$ to the code default $0.001$ improves both private and public scores}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{7}{section.5}\protected@file@percent }
+\newlabel{sec:discussion}{{5}{7}{Discussion}{section.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{7}{section.6}\protected@file@percent }
+\newlabel{sec:conclusion}{{6}{7}{Conclusion}{section.6}{}}
+\bibcite{rtmdet}{2}
+\bibcite{yolox}{3}
+\bibcite{maskrcnn}{4}
+\bibcite{swin}{5}
+\bibcite{wbf}{6}
+\bibcite{vitadapter}{7}
+\bibcite{cbnetv2}{8}
+\bibcite{detectors}{9}
+\bibcite{htc}{10}
+\bibcite{resnext}{11}
+\bibcite{resnet}{12}
+\bibcite{ultralytics}{13}
+\bibcite{internimage}{14}
+\bibcite{cascade_rcnn}{15}
+\bibcite{fpn}{16}
+\bibcite{tascj2023hubmapfirst}{17}
+\bibcite{nischay2023hubmapthird}{18}
 \gdef\svg@ink@ver@settings{{\m@ne }{inkscape}{\m@ne }}
-\gdef \@abspage@last{6}
+\gdef \@abspage@last{8}
