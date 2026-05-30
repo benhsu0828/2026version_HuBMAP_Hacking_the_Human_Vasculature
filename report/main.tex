@@ -34,23 +34,39 @@ We do not attempt to survey all leaderboard solutions. Instead, we focus on two 
 
 \subsection{First-place direction: WSI-aware heterogeneous ensembles}
 
-The public first-place release is not a single model. In the released notebook and configs, the final system is a heterogeneous MMDetection ensemble that includes RTMDet-X, YOLOX-X, and Swin-based Mask R-CNN / RTMDet variants. The strongest single model in the release is an RTMDet-X variant with an extra FCN mask head. Its backbone is CSPNeXt, its neck is CSPNeXt-PAFPN, and the custom mask branch applies RoIAlign on multi-scale features before predicting binary instance masks.
+The first-place Kaggle write-up frames the problem as box-quality-driven instance segmentation: AP is dominated by bounding-box localization, while mask prediction can be delegated to a strong mask head after the boxes are fixed~\cite{tascj2023hubmapfirst}. This explains why the public release is not a single semantic-segmentation model. It is a heterogeneous MMDetection ensemble that includes RTMDet-X, YOLOX-X, and Mask R-CNN streams. The released training repository also marks RTMDet-X as the best single model, and its configs add mask supervision through an extra mask head on top of the detector~\cite{tascj2023hubmapfirst}.
 
 Several design choices are especially relevant:
 \begin{itemize}
-    \item \textbf{WSI-aware validation.} The released data preparation uses WSI/spatial splits such as \texttt{dtrain0i.json}/\texttt{dval0i.json}, avoiding overly optimistic random splits.
-    \item \textbf{Strong geometric and color augmentation.} The configs use rotations, scale/crop transforms, horizontal flipping, and HSV/color augmentations. These act as stain- and morphology-robustness mechanisms without explicitly doing stain normalization.
-    \item \textbf{Model diversity.} The final prediction is built from multiple detector families rather than a single architecture. WBF is used to fuse bounding boxes across streams.
-    \item \textbf{Box-first mask refinement.} The final ensemble first merges boxes, then re-predicts masks from a strong Mask R-CNN branch. This is an important observation: mask mAP is strongly limited by box quality.
+    \item \textbf{WSI-aware validation.} Dataset 1 is split by spatial \texttt{i} location instead of random tile splitting. The write-up reports that this split is harder than random splitting, which makes it more useful for avoiding over-optimistic validation.
+    \item \textbf{EMA as a stabilizer.} The author highlights Exponential Moving Average (EMA) as the most important technique in the experiments. Multiple EMA copies were evaluated from a single training run, which gave a stable basis for model selection.
+    \item \textbf{Mask supervision for better boxes.} RTMDet-X already produced strong boxes, but adding mask supervision and random rotation improved bbox mAP. The mask head was therefore used not only for final masks, but also as an auxiliary signal for localization.
+    \item \textbf{Box-first ensemble.} The final ensemble uses WBF over three RTMDet models, one YOLOX-X model with mask supervision, and one Mask R-CNN. All five model types are represented by two different fold weights. The final masks are generated from a Mask R-CNN mask head at input size 1440, and the write-up explicitly notes that no TTA was used.
 \end{itemize}
 
-This project therefore uses the first-place pipeline as the main baseline: reproduce the MMDetection ensemble behavior, then test whether a new stream improves or hurts the fused result.
+This project therefore uses the first-place pipeline as the main baseline: reproduce the MMDetection ensemble behavior, keep the bbox-first interpretation of the metric, then test whether a new stream improves or hurts the fused box set.
 
 \subsection{Third-place direction: multi-stage training}
 
-The other useful idea is the multi-stage training strategy: pretrain on noisy/larger data, then fine-tune on clean/smaller data. In our code this appears in \texttt{mmdet\_v3\_solution}: Stage 1 trains on Dataset 2, and Stage 2 fine-tunes on Dataset 1. This strategy is reasonable because Dataset 2 can teach broad morphological priors, while Dataset 1 should correct boundary precision and class noise.
+The third-place write-up focuses on how to properly use noisy annotations~\cite{nischay2023hubmapthird}. The final system uses five MMDetection-based models: two ViT-Adapter-L models, one CBNetV2-Base model, one DetectoRS ResNeXt-101-32x4d model, and one DetectoRS ResNet-50 model. The author reports using only competition data, with no external image data. The key training idea is multi-stage learning: first pretrain on all noisy Dataset 2 WSIs for a short schedule with light augmentation and high learning rate, then fine-tune on clean Dataset 1 for more epochs with heavier augmentation, higher image resolution, and a lower learning rate.
 
-However, the original high-ranking multi-stage systems used large high-capacity backbones and high-resolution training. Our experiment replaces that family with an InternImage-T backbone inside Cascade Mask R-CNN. This makes the experiment informative but not a faithful reproduction of the third-place architecture.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\linewidth]{figure/third_place_multistage.png}
+    \caption{Third-place multi-stage training diagram from the Kaggle write-up~\cite{nischay2023hubmapthird}. The central idea is to use Dataset 2 for broad noisy pretraining and Dataset 1 for clean high-resolution fine-tuning.}
+    \label{fig:third_multistage}
+\end{figure}
+
+The same write-up also describes a pseudo-label extension for Dataset 3. In that branch, multi-stage models generate predictions, WBF ensembles them, confidence thresholding filters them, and the remaining pseudo labels are combined with Dataset 3 before another multi-stage training pass. The author states that pseudo labels were used in some final ensemble models, although they did not clearly improve leaderboard score. Reported useful techniques include multi-stage training, flip TTA, higher mask-head loss weights for HTC-based models, SGD, WBF, and erosion followed by one dilation step as post-processing.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\linewidth]{figure/third_place_pseudo_label.png}
+    \caption{Third-place pseudo-label extension from the Kaggle write-up~\cite{nischay2023hubmapthird}. Ensemble predictions are thresholded into Dataset 3 pseudo labels and then folded back into another multi-stage training pass.}
+    \label{fig:third_pseudo}
+\end{figure}
+
+In our code this appears in \texttt{mmdet\_v3\_solution}: Stage 1 trains on Dataset 2, and Stage 2 fine-tunes on Dataset 1. This strategy is reasonable because Dataset 2 can teach broad morphological priors, while Dataset 1 should correct boundary precision and class noise. However, the original third-place system used much larger high-capacity backbones, higher training and inference resolutions such as 1400--2048 pixels, multi-scale inference, and a five-model ensemble. Our experiment replaces that family with an InternImage-T backbone inside Cascade Mask R-CNN. This makes the experiment informative but not a faithful reproduction of the third-place architecture.
 
 \section{Baseline Reproduction}
 \label{sec:baseline}
